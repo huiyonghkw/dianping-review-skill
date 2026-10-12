@@ -1,5 +1,6 @@
 ---
 name: dianping-review-skill
+slug: dianping-review-skill
 version: 1.0.0
 license: MIT-0
 description: >
