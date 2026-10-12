@@ -11,13 +11,20 @@
 <link rel="canonical" href="https://huiyonghkw.github.io/dianping-review-skill/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f1320'/%3E%3Cpath d='M16 7l2.6 5.6 6.1.7-4.5 4.2 1.2 6L16 20.5 10.6 23.5l1.2-6-4.5-4.2 6.1-.7z' fill='none' stroke='%2306a88c' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E">
 <style>
+/* 拉丁走系统 SF；中文落到自托管 HKW Sans SC（Noto Sans SC 可变子集，真 800/900，苹方最粗只到 Semibold） */
+@font-face{
+  font-family:'HKW Sans SC';
+  src:url('fonts/hkw-sans-sc-subset.woff2') format('woff2-variations'),
+      url('fonts/hkw-sans-sc-subset.woff2') format('woff2');
+  font-weight:100 900;font-style:normal;font-display:swap;
+}
 :root{
   --bg:#f4f6f9;--surface:#ffffff;--surface2:#eef1f5;
   --border:rgba(15,20,30,.08);--border2:rgba(15,20,30,.14);
   --text:#0f1320;--read:#2b3242;--text2:#535b6b;--text3:#8a92a3;
   --accent:#06a88c;--accent2:#6a45e0;--accent3:#bf7d1a;
   --accent-rgb:6,168,140;--grid-rgb:15,20,30;--danger:#d23f4d;
-  --font:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',system-ui,sans-serif;
+  --font:-apple-system,BlinkMacSystemFont,'HKW Sans SC','PingFang SC','Hiragino Sans GB','Microsoft YaHei',system-ui,sans-serif;
   --mono:'SF Mono',SFMono-Regular,ui-monospace,Menlo,Consolas,monospace;
   --shadow:0 1px 2px rgba(20,30,50,.05),0 8px 24px rgba(20,30,50,.06);
   --shadow2:0 2px 4px rgba(20,30,50,.05),0 16px 36px rgba(20,30,50,.09);
