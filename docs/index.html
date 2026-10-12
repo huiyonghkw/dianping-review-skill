@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
-<title>dianping-review-skill · 每个数字，都对得上账</title>
-<meta name="description" content="大众点评评价 Skill：照片加一句话，写成真实的评价和探店笔记。正文里每个数字都能在你的事实卡里找到。免费版 MIT-0，只需 Python 3。">
-<meta property="og:title" content="dianping-review-skill · 每个数字，都对得上账">
+<title>dianping-review-skill · 大众点评评价助手</title>
+<meta name="description" content="dianping-review-skill · 大众点评评价助手：照片加一句话，写成真实的评价和探店笔记。正文里每个数字都能在你的事实卡里找到。免费版 MIT-0，只需 Python 3。">
+<meta property="og:title" content="dianping-review-skill · 大众点评评价助手">
 <meta property="og:description" content="照片加一句话，写成真实的大众点评评价和探店笔记。每个数字都有出处，评价笔记不撞车，品类必写项自动提醒。">
 <meta property="og:type" content="website">
 <link rel="canonical" href="https://huiyonghkw.github.io/dianping-review-skill/">
@@ -22,6 +22,7 @@
     </a>
     <nav class="flex items-center gap-5.5 text-sm text-ink2">
       <a class="hidden hover:text-ink md:inline" href="#audit">对账</a>
+      <a class="hidden hover:text-ink md:inline" href="#features">功能</a>
       <a class="hidden hover:text-ink md:inline" href="#category">品类</a>
       <a class="hidden hover:text-ink md:inline" href="#lines">红线</a>
       <a class="hidden hover:text-ink md:inline" href="https://github.com/huiyonghkw/dianping-review-skill" target="_blank" rel="noopener">GitHub</a>
@@ -34,8 +35,12 @@
 <div class="bg-hero border-b border-rule py-12 md:pt-18 md:pb-22">
   <div class="mx-auto grid w-[min(1120px,calc(100%-32px))] items-center gap-9 md:w-[min(1120px,calc(100%-48px))] md:grid-cols-[1.15fr_.85fr] md:gap-16">
     <div>
-      <h1 class="text-[clamp(44px,6.4vw,84px)] leading-[1.08] font-black tracking-[-.03em]">每个数字，<br>都<em class="bg-linear-to-r from-accent to-accent-deep bg-clip-text not-italic text-transparent">对得上账</em>。</h1>
-      <p class="mt-6.5 max-w-[30em] text-[19px] leading-[1.75] text-ink2">把照片和一句话交给 AI，写成真实的大众点评评价和探店笔记。正文里每个数字，都能在你的事实卡里找到。</p>
+      <div class="inline-flex flex-wrap items-center gap-x-2 gap-y-1 rounded-full border border-rule2 bg-slip/70 px-3.5 py-1.5 font-mono text-[12.5px] text-ink2">
+        <span class="font-bold text-ink">dianping-review-skill</span><span class="text-ink3">·</span><span>v1.0.0</span><span class="text-ink3">·</span><span>MIT-0</span><span class="text-ink3">·</span><span>Agent Skill</span>
+      </div>
+      <h1 class="mt-6 text-[clamp(48px,7vw,92px)] leading-[1.04] font-black tracking-[-.03em]">大众点评<br><em class="bg-linear-to-r from-accent to-accent-deep bg-clip-text not-italic text-transparent">评价助手</em></h1>
+      <p class="mt-5 text-[clamp(22px,2.6vw,30px)] leading-snug font-black text-ink2">每个数字，都对得上账。</p>
+      <p class="mt-4 max-w-[30em] text-[18px] leading-[1.75] text-ink2">给 Claude Code、Cursor 等 AI 用的 Skill。把照片和一句话交给它，写成真实的大众点评评价和探店笔记；正文里每个数字，都能在你的事实卡里找到。</p>
       <div class="mt-8.5 flex flex-wrap gap-3">
         <a class="bg-flame inline-flex items-center rounded-slip px-5.5 py-3.25 text-[15px] font-extrabold whitespace-nowrap text-white shadow-[0_10px_24px_rgb(255_90_31/.32)] transition-transform duration-200 hover:-translate-y-0.5" href="#install">免费安装</a>
         <a class="inline-flex items-center rounded-slip border-[1.5px] border-ink px-5.5 py-3.25 text-[15px] font-extrabold whitespace-nowrap transition-colors duration-200 hover:bg-paper2" href="#audit">看它怎么对账</a>
@@ -91,6 +96,25 @@
         </div>
         <p class="mt-4 text-[13.5px] leading-relaxed text-ink3">内容检查脚本做的就是这件事：正文出现事实卡里没有的数字，直接拦下，改完才能交付。</p>
       </aside>
+    </div>
+  </div>
+</section>
+
+<section id="features" class="border-b border-rule py-18 md:py-26">
+  <div class="mx-auto w-[min(1120px,calc(100%-32px))] md:w-[min(1120px,calc(100%-48px))]">
+    <div class="mb-4 font-mono text-[12.5px] text-accent-ink">功能清单</div>
+    <h2 class="max-w-[18em] text-[clamp(30px,4.2vw,48px)] leading-[1.18] font-black tracking-[-.02em]">从拍完照，到能发出去。</h2>
+    <p class="mt-4.5 max-w-[36em] text-[17px] text-ink2">一次对话走完：问清缺的事实，写正文，自查，整理成能直接发的样子。</p>
+    <div class="slip rv mt-12 px-6 pt-4 pb-10 md:px-9">
+      <ol class="divide-y divide-dashed divide-rule2 [&>li]:grid [&>li]:grid-cols-[2.5rem_1fr] [&>li]:items-baseline [&>li]:gap-x-3 [&>li]:py-5 md:[&>li]:grid-cols-[3rem_14rem_1fr_auto] md:[&>li]:gap-x-6 [&_.n]:font-mono [&_.n]:text-[15px] [&_.n]:font-bold [&_.n]:text-accent [&_h3]:text-[18px] [&_h3]:font-black [&_p]:col-start-2 [&_p]:text-[15px] [&_p]:text-ink2 md:[&_p]:col-start-auto [&_.tag]:col-start-2 [&_.tag]:mt-2 [&_.tag]:justify-self-start [&_.tag]:rounded-full [&_.tag]:px-2.5 [&_.tag]:py-0.5 [&_.tag]:font-mono [&_.tag]:text-[12px] [&_.tag]:font-bold md:[&_.tag]:col-start-auto md:[&_.tag]:mt-0">
+        <li><span class="n">01</span><h3>事实卡</h3><p>一次问清价格、时长、交通这些缺的事实，连同照片里看得到的，记成一张卡。</p><span class="tag bg-accent-soft text-accent-ink">免费</span></li>
+        <li><span class="n">02</span><h3>评价 + 笔记</h3><p>同一家店写两篇，开头卖点不撞车；附标题、标签、图片顺序和你给的星级。</p><span class="tag bg-accent-soft text-accent-ink">免费</span></li>
+        <li><span class="n">03</span><h3>品类必写项</h3><p>餐饮、美容美发、休闲娱乐、亲子、酒店民宿，各有读者最想先知道的几件事。</p><span class="tag bg-accent-soft text-accent-ink">免费</span></li>
+        <li><span class="n">04</span><h3>内容检查</h3><p>数字没出处、人均前后不一、广告法极限词、手机号微信，交付前全部拦下。</p><span class="tag bg-accent-soft text-accent-ink">免费</span></li>
+        <li><span class="n">05</span><h3>手动发布包</h3><p>照片按上传顺序编号，文案存成文件，打开点评 App 照着发。</p><span class="tag bg-accent-soft text-accent-ink">免费</span></li>
+        <li><span class="n">06</span><h3>代发与手机交接</h3><p>Mac 微信小程序代发，停在预览等你确认；发不了的店经 iCloud 送到手机。</p><span class="tag bg-ink text-paper">Pro</span></li>
+        <li><span class="n">07</span><h3>数据复盘</h3><p>发布 3 天后采集浏览、点赞、评论，结论写回经验库，下一篇写得更好。</p><span class="tag bg-ink text-paper">Pro</span></li>
+      </ol>
     </div>
   </div>
 </section>
@@ -153,6 +177,8 @@
       <div class="bg-term overflow-x-auto rounded-slip px-6 py-5.5 font-mono text-[13.5px] leading-[1.95] whitespace-pre text-[#e8e1d2] shadow-[0_24px_48px_rgb(20_12_6/.25)]"><span class="text-[#ff7a45]">$</span> git clone https://github.com/huiyonghkw/dianping-review-skill.git
 <span class="text-[#ff7a45]">$</span> ln -s "$PWD/dianping-review-skill" \
     ~/.claude/skills/dianping-review-skill
+<span class="text-[#8f8878]"># 或者从 ClawHub 装</span>
+<span class="text-[#ff7a45]">$</span> clawhub install dianping-review-skill
 <span class="text-[#8f8878]"># Claude Code、Cursor、Codebuddy 都能用
 # 只需要 Python 3，Windows / Linux / macOS 都行</span></div>
       <div class="flex flex-col gap-3">
