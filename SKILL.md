@@ -1,6 +1,9 @@
 ---
 name: dianping-review-skill
 slug: dianping-review-skill
+displayName: 大众点评评价助手
+summary: 大众点评评价 / 探店笔记写作助手：照片 + 口述 → 不编造的评价和笔记，事实卡对账、品类必写项、内容检查、手动发布包。免费版，纯 Python 标准库。
+homepage: https://huiyonghkw.github.io/dianping-review-skill/
 version: 1.0.0
 license: MIT-0
 description: >
