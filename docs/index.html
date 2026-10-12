@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>dianping-review-skill · 大众点评评价助手 — 把照片和一句话写成真实的点评</title>
+<meta name="description" content="给 Claude Code / Cursor 等 AI 工具用的大众点评评价 Skill：照片 + 口述 → 真实不编造的评价和探店笔记。每个数字都要有出处，品类必写项自动提醒，只需 Python 3。免费版 MIT-0。">
+<meta property="og:title" content="dianping-review-skill · 大众点评评价助手">
+<meta property="og:description" content="照片 + 口述 → 真实不编造的大众点评评价 / 探店笔记 · 数字有出处 · 品类必写项 · 免费 MIT-0">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://huiyonghkw.github.io/dianping-review-skill/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f1320'/%3E%3Cpath d='M16 7l2.6 5.6 6.1.7-4.5 4.2 1.2 6L16 20.5 10.6 23.5l1.2-6-4.5-4.2 6.1-.7z' fill='none' stroke='%2306a88c' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#f4f6f9;--surface:#ffffff;--surface2:#eef1f5;
+  --border:rgba(15,20,30,.08);--border2:rgba(15,20,30,.14);
+  --text:#0f1320;--read:#2b3242;--text2:#535b6b;--text3:#8a92a3;
+  --accent:#06a88c;--accent2:#6a45e0;--accent3:#bf7d1a;
+  --accent-rgb:6,168,140;--grid-rgb:15,20,30;--danger:#d23f4d;
+  --font:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',system-ui,sans-serif;
+  --mono:'SF Mono',SFMono-Regular,ui-monospace,Menlo,Consolas,monospace;
+  --shadow:0 1px 2px rgba(20,30,50,.05),0 8px 24px rgba(20,30,50,.06);
+  --shadow2:0 2px 4px rgba(20,30,50,.05),0 16px 36px rgba(20,30,50,.09);
+  --flare:linear-gradient(100deg,var(--accent),var(--accent2));
+  --flare-cta:linear-gradient(135deg,var(--accent),var(--accent2));
+  --hero-bg:radial-gradient(1100px 650px at 50% -12%,#e9edf6 0%,transparent 60%),
+             radial-gradient(900px 550px at 82% 6%,#e3f2ee 0%,transparent 55%),
+             linear-gradient(180deg,#ffffff 0%,#f8fafc 60%,#f4f6f9 100%);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;font-size:16px}
+body{background:var(--bg);color:var(--text);font-family:var(--font);
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;line-height:1.7;overflow-x:hidden}
+h1,h2,h3,.sec,.foot-brand{font-weight:800}
+a{color:inherit}
+.prog{position:fixed;top:0;left:0;height:3px;width:0;z-index:50;background:var(--flare);transition:width .1s linear}
+
+.topnav{position:sticky;top:0;z-index:40;display:flex;justify-content:space-between;align-items:center;gap:16px;
+  padding:12px 28px;background:rgba(255,255,255,.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border)}
+.topnav .brand{display:flex;align-items:center;gap:11px;font-size:16px;font-weight:800;color:var(--text);text-decoration:none;white-space:nowrap}
+.topnav .mark{width:26px;height:26px;border-radius:8px;
+  background:conic-gradient(from 200deg,var(--accent2),var(--accent3),var(--accent),var(--accent2));
+  box-shadow:0 4px 12px rgba(var(--accent-rgb),.28)}
+.topnav .links{display:flex;align-items:center;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.topnav .links a{font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--text2);
+  text-decoration:none;padding:7px 11px;border-radius:999px}
+.topnav .links a:hover{color:var(--text);background:var(--surface2)}
+.topnav .cta{background:var(--flare-cta)!important;color:#fff!important;font-weight:700;box-shadow:0 6px 18px rgba(var(--accent-rgb),.22)}
+.topnav .buy-link{color:var(--accent)!important;font-weight:700}
+
+.hero{position:relative;background:var(--hero-bg);padding:88px 28px 72px;text-align:center;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(circle,rgba(var(--grid-rgb),.05) 1px,transparent 1px);background-size:22px 22px;
+  -webkit-mask-image:radial-gradient(78% 82% at 50% 0%,#000 20%,transparent 100%);
+          mask-image:radial-gradient(78% 82% at 50% 0%,#000 20%,transparent 100%)}
+.hero>*{position:relative}
+.eyebrow{font-family:var(--mono);font-size:12.5px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--accent);display:inline-flex;align-items:center;gap:10px;
+  background:rgba(var(--accent-rgb),.08);border:1px solid var(--border2);border-radius:999px;padding:8px 18px}
+.eyebrow i{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,var(--accent2),var(--accent3));display:inline-block}
+.hero h1{font-size:clamp(34px,5.6vw,62px);line-height:1.16;letter-spacing:-.02em;margin:28px auto 0;max-width:920px;text-wrap:balance}
+.hero h1 .hl{background:var(--flare);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .sub{font-size:18px;line-height:1.75;color:var(--text2);max-width:620px;margin:22px auto 0}
+.hero .sub b{color:var(--read);font-weight:600}
+.actions{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin-top:32px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border-radius:999px;
+  font-size:15.5px;font-weight:800;text-decoration:none}
+.btn-primary{background:var(--flare-cta);color:#fff;box-shadow:0 14px 32px rgba(var(--accent-rgb),.28)}
+.btn-ghost{background:var(--surface);color:var(--text);border:1px solid var(--border2);box-shadow:var(--shadow)}
+.hero-meta{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:28px}
+.hero-meta span{font-family:var(--mono);font-size:12px;color:var(--text3);
+  background:rgba(255,255,255,.78);border:1px solid var(--border);border-radius:999px;padding:6px 14px}
+
+.stage-wrap{position:relative;z-index:5;width:min(980px,calc(100% - 40px));margin:-28px auto 0}
+.stage{background:var(--surface);border:1px solid var(--border);border-radius:22px;overflow:hidden;box-shadow:var(--shadow2)}
+.stage-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  padding:12px 18px;background:var(--surface2);border-bottom:1px solid var(--border)}
+.stage-bar .dots{display:flex;gap:7px}
+.stage-bar .dots i{width:10px;height:10px;border-radius:50%}
+.stage-bar .dots i:nth-child(1){background:#ff5f57}
+.stage-bar .dots i:nth-child(2){background:#febc2e}
+.stage-bar .dots i:nth-child(3){background:#28c840}
+.stage-bar .title{font-family:var(--mono);font-size:12px;color:var(--text3);letter-spacing:.04em}
+.tog{display:inline-flex;padding:3px;background:rgba(15,20,30,.05);border-radius:999px;border:1px solid var(--border)}
+.tog button{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;border:0;background:transparent;
+  color:var(--text3);padding:7px 14px;border-radius:999px;cursor:pointer;font-weight:600}
+.tog button.on{background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
+.panes{background:#ebe8df;padding:18px 16px 28px}
+.pane{display:none;margin:0 auto;max-width:min(46em,calc(100% - 1rem));padding:2rem 1.75rem 2.4rem;border-radius:14px;
+  background:radial-gradient(140% 95% at 50% -8%,#fffef8 0%,#fdfdfc 48%,#f3f1ea 100%);color:#141413;
+  box-shadow:inset 0 0 4.5rem rgba(31,30,29,.05),0 1px 2px rgba(31,30,29,.04),0 10px 28px rgba(31,30,29,.06);
+  font-size:15.5px;line-height:1.75}
+.pane.on{display:block}
+.pane .k{font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.pane h2{font-size:1.3rem;line-height:1.35;font-weight:700;margin-bottom:.8rem}
+.pane p{margin-bottom:.7rem}
+.pane .stars{color:#ff8a00;letter-spacing:.1em;font-size:18px;margin-bottom:.6rem}
+.pane .stars small{color:var(--text3);font-family:var(--mono);font-size:12px;letter-spacing:0;margin-left:6px}
+.pane .tags{font-family:var(--mono);font-size:13px;color:var(--accent);margin-top:.9rem}
+.pane pre{font-family:var(--mono);font-size:13px;line-height:1.8;white-space:pre-wrap;color:#2b3242}
+.pane pre .ok{color:#139a5b}.pane pre .w{color:#bf7d1a}.pane pre .b{color:var(--text3)}
+.stage-note{font-family:var(--mono);font-size:12px;color:var(--text3);padding:12px 18px;border-top:1px solid var(--border);background:var(--surface2)}
+
+main{position:relative;z-index:1;max-width:800px;margin:0 auto;padding:64px 28px 100px}
+section{margin-top:80px}
+.sec-label{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+h2.sec{font-size:clamp(26px,4vw,34px);line-height:1.28;letter-spacing:-.015em;text-wrap:balance}
+.prose{font-size:16.5px;line-height:1.85;color:var(--read);margin-top:18px}
+.prose b{color:var(--text);font-weight:600}
+.prose code,.ds code,.ask code{font-family:var(--mono);font-size:.88em;background:var(--surface2);border:1px solid var(--border);
+  border-radius:6px;padding:1px 7px;color:var(--accent)}
+
+.hl-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:28px}
+.hl-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px 22px 20px;box-shadow:var(--shadow)}
+.hl-card .tag{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+.hl-card:nth-child(3n+2) .tag{color:var(--accent2)}
+.hl-card:nth-child(3n) .tag{color:var(--accent3)}
+.hl-card h3{font-size:17px;line-height:1.35;margin-bottom:8px}
+.hl-card p{font-size:14px;line-height:1.7;color:var(--text2)}
+.hl-card p b{color:var(--text);font-weight:600}
+
+.rules{display:flex;flex-direction:column;gap:12px;margin-top:24px;counter-reset:rule}
+.rule{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px 20px 18px 64px;box-shadow:var(--shadow);position:relative}
+.rule::before{counter-increment:rule;content:counter(rule,decimal-leading-zero);
+  position:absolute;left:18px;top:18px;font-family:var(--mono);font-size:15px;font-weight:700;color:var(--accent)}
+.rule h3{font-size:15.5px;margin-bottom:6px}
+.rule p{font-size:14px;line-height:1.7;color:var(--text2)}
+.rule p b{color:var(--text);font-weight:600}
+
+.tbl-wrap{margin-top:24px;overflow-x:auto;border:1px solid var(--border);border-radius:16px;background:var(--surface);box-shadow:var(--shadow)}
+.tbl{width:100%;border-collapse:collapse;font-size:14px;min-width:520px}
+.tbl th,.tbl td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.55}
+.tbl th{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);background:var(--surface2)}
+.tbl td:first-child{font-weight:700;white-space:nowrap}
+.tbl tr:last-child td{border-bottom:0}
+.tbl .y{color:var(--accent);font-weight:700}
+.tbl .n{color:var(--text3)}
+
+.install{margin-top:24px;background:#0d1117;border:1px solid rgba(15,20,30,.35);border-radius:12px;overflow:hidden;
+  box-shadow:0 12px 32px rgba(15,20,30,.18),0 2px 6px rgba(15,20,30,.08)}
+.install .ch{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#161b22;border-bottom:1px solid rgba(255,255,255,.06)}
+.install .ch .dots{display:flex;gap:6px}
+.install .ch .dots i{width:11px;height:11px;border-radius:50%;display:block}
+.install .ch .dots i:nth-child(1){background:#ff5f57}
+.install .ch .dots i:nth-child(2){background:#febc2e}
+.install .ch .dots i:nth-child(3){background:#28c840}
+.install .ch .lab{font-family:var(--mono);font-size:11.5px;font-weight:600;letter-spacing:.04em;color:#7b8499;margin-left:4px}
+.install pre{font-family:var(--mono);font-size:13px;line-height:1.85;padding:16px 18px;overflow-x:auto;color:#c8cdd8;white-space:pre}
+.install .cm{color:#6b7488}.install .p{color:#06d3ae;font-weight:600}.install .o{color:#f0a050}
+
+.say{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.say span{font-size:13.5px;color:var(--text2);background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:7px 14px}
+
+.buy-sub{font-family:var(--mono);font-size:13px;color:var(--text3);margin-top:10px;letter-spacing:.04em}
+.buy-steps{display:flex;flex-direction:column;gap:12px;margin-top:28px}
+.buy-step{display:grid;grid-template-columns:48px 1fr;gap:14px;align-items:start;
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px 20px;box-shadow:var(--shadow)}
+.buy-step .sq{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--accent);width:40px;height:40px;border-radius:12px;
+  background:rgba(var(--accent-rgb),.1);display:flex;align-items:center;justify-content:center}
+.buy-step .tt{font-size:16px;font-weight:800;margin-bottom:4px}
+.buy-step .ds{font-size:14px;line-height:1.65;color:var(--text2)}
+.qrgrp{margin-top:28px}
+.qrgrp .ghd{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--text3);margin-bottom:12px;
+  display:flex;align-items:center;gap:10px}
+.qrgrp .ghd .n{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;
+  background:rgba(var(--accent-rgb),.12);color:var(--accent);font-size:11px}
+.qr{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.qrbox{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;text-align:center;box-shadow:var(--shadow)}
+.qrbox img{width:100%;max-width:240px;height:auto;display:block;margin:0 auto;border-radius:8px}
+.qrbox .lbl{font-family:var(--mono);font-size:12.5px;color:var(--text2);margin-top:12px}
+.qrbox .lbl b{color:var(--text)}
+.wxid{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px 20px;box-shadow:var(--shadow);
+  display:flex;flex-direction:column;justify-content:center;gap:8px}
+.wxid .k{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;color:var(--text3)}
+.wxid .id{font-family:var(--mono);font-size:28px;font-weight:700;color:var(--text)}
+.wxid .n{font-size:13.5px;line-height:1.65;color:var(--text2)}
+.ask{margin-top:18px;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:16px 18px;
+  font-size:14px;line-height:1.7;color:var(--text2)}
+.ask .lb{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:8px}
+.ask b{color:var(--text)}
+.ask a{color:var(--accent)}
+
+.sources{margin-top:40px;font-family:var(--mono);font-size:12.5px;color:var(--text3);line-height:1.9}
+.sources a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(var(--accent-rgb),.35)}
+.sources b{color:var(--text2);font-weight:600}
+footer{margin-top:56px;border-top:1px solid var(--border);padding-top:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.foot-brand{font-size:16px}
+.foot-meta{font-family:var(--mono);font-size:12.5px;color:var(--text3)}
+.foot-meta a{color:var(--text2);text-decoration:none}
+.foot-meta a:hover{color:var(--accent)}
+
+@media(max-width:720px){
+  .topnav{padding:10px 16px}
+  .topnav .brand{font-size:14px;gap:8px}
+  .topnav .links a:not(.cta):not(.buy-link){display:none}
+  .hero{padding:64px 20px 56px}
+  .stage-wrap{width:calc(100% - 24px)}
+  .pane{padding:1.5rem 1.15rem 2rem}
+  .hl-grid,.qr{grid-template-columns:1fr}
+  main{padding:48px 20px 80px}
+}
+</style>
+</head>
+<body>
+<div class="prog" id="prog"></div>
+
+<nav class="topnav">
+  <a class="brand" href="#"><span class="mark" aria-hidden="true"></span>dianping-review-skill</a>
+  <div class="links">
+    <a href="#highlights">亮点</a>
+    <a href="#flow">流程</a>
+    <a href="#categories">品类</a>
+    <a href="#rules">红线</a>
+    <a class="buy-link" href="#buy">Pro ¥49</a>
+    <a href="https://github.com/huiyonghkw/dianping-review-skill" target="_blank" rel="noopener">GitHub</a>
+    <a class="cta" href="#install">Install</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="eyebrow"><i></i> Agent Skill · 大众点评 · Free MIT-0</div>
+  <h1>把照片和一句话<br><span class="hl">写成真实的点评</span></h1>
+  <p class="sub">给 Claude Code、Cursor 用的大众点评 Skill。它只写<b>你说过的和照片里看得到的</b>，正文里<b>每个数字都要有出处</b>，评价和笔记各写各的，不互相改写。</p>
+  <div class="actions">
+    <a class="btn btn-primary" href="#install">安装免费版</a>
+    <a class="btn btn-ghost" href="#buy">Pro · 代发与复盘 · ¥49</a>
+  </div>
+  <div class="hero-meta">
+    <span>Free · 写作 + 内容检查 + 手动发布包</span>
+    <span>Pro · Mac 小程序代发 / 手机交接 / 复盘</span>
+    <span>只需 Python 3</span>
+    <span>MIT-0</span>
+  </div>
+</header>
+
+<div class="stage-wrap" id="stage">
+  <div class="stage">
+    <div class="stage-bar">
+      <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="title">交付样张 · 同治龙窑（亲子陶艺）</div>
+      <div class="tog" role="group" aria-label="切换样张">
+        <button type="button" class="on" data-pane="review">评价</button>
+        <button type="button" data-pane="note">笔记</button>
+        <button type="button" data-pane="gate">内容检查</button>
+      </div>
+    </div>
+    <div class="panes">
+      <article class="pane on" id="pane-review">
+        <div class="k">评价 · 写给已经想去、在做决定的人</div>
+        <div class="stars">★★★★☆ <small>4.5 星 · 用户自己给的分</small></div>
+        <p>免费逛150年龙窑，100元带娃拉了2个陶罐</p>
+        <p>我们这次带娃来同治龙窑，冲着拉坯来的。参观是免费的，制作陶罐2个100元，老师可以在旁边指导。最后做了一个花瓶、一个葫芦瓶，瓶身上还刻了字。</p>
+        <p>除了上釉要单独收费，其他都不另外收钱。做好的陶罐要等1个月左右，会联系寄送，不用再跑一趟。</p>
+        <p>做完别急着走，去看看窑。牌子上写着始建于清同治年间，夯土建的窑形似一条卧龙，现存两座窑室，现在仍在使用，窑洞里码满了陶罐。</p>
+        <p>时间上，我们上午11点拉坯，下午2点半看成品，中间逛窑、去镇上吃饭，刚好半天。</p>
+        <p>几个提醒：离市区30多公里，适合自驾；这里纯粹是体验为主，吃饭可以去周边1公里的镇上。适合亲子家庭，或者几家人约着一起来。</p>
+        <p>你们家娃第一次拉坯，做出来的是什么形状？</p>
+        <div class="tags">#成都亲子 #陶艺体验 #双流周边游 #非遗体验 #周末遛娃</div>
+      </article>
+      <article class="pane" id="pane-note">
+        <div class="k">笔记 · 写给还在找周末去处的人 · 开头卖点和评价不重复</div>
+        <h2>30公里外，带娃逛一座还在用的清代龙窑</h2>
+        <p>我们带娃去了双流的同治龙窑，从市区过去30多公里。上午11点拉坯，下午2点半看成品，中间逛窑、去镇上吃饭，刚好半天。</p>
+        <p><b>【半天怎么安排】</b><br>• 上午先拉坯：老师在旁边指导，陶罐2个100元<br>• 做完逛窑：三根老烟囱下面就是龙窑，窑洞里码满陶罐<br>• 中午去镇上：吃饭去周边1公里的镇上<br>• 最后看成品：娃的花瓶和葫芦瓶摆在台子上</p>
+        <p><b>【拍照机位我觉得这几个好】</b><br>• 三根烟囱 + 老窑墙：站在草地上仰拍<br>• 窑洞口往里拍：一排排陶罐码到洞底</p>
+        <p><b>【不太适合谁】</b><br>• 想找吃喝玩一站式的：吃饭要去镇上<br>• 没车的：离市区30多公里，适合自驾</p>
+        <p>成都周边还有哪些能让娃动手做东西的地方？</p>
+        <div class="tags">#成都遛娃 #同治龙窑 #历史建筑 #亲子陶艺 #成都周边自驾</div>
+      </article>
+      <article class="pane" id="pane-gate">
+        <div class="k">content_gate.py · 评价稿初版 → 补上时长后</div>
+<pre>门禁结果: ✅ PASS  (kind=review)
+  <span class="ok">✓</span> [block] 广告法极限词  <span class="b">— 无</span>
+  <span class="ok">✓</span> [block] 站外导流  <span class="b">— 无</span>
+  <span class="ok">✓</span> [block] AI味堆砌词  <span class="b">— 无</span>
+  <span class="ok">✓</span> [block] 数字有出处  <span class="b">— 10 处全部有出处</span>
+  <span class="ok">✓</span> [block] 第一人称锚点≥2  <span class="b">— 共 3 处</span>
+  <span class="ok">✓</span> [block] 正文字数 140–600  <span class="b">— 实际 345</span>
+  <span class="ok">✓</span> [warn] 结尾提问  <span class="b">— 有</span>
+  <span class="w">!</span> [warn] 品类必写（亲子体验）  <span class="b">— 初版缺: 时长或节奏</span>
+  <span class="ok">✓</span> [warn] 品类必写（亲子体验）  <span class="b">— 补上「11点拉坯，2点半看成品」后都写到了</span>
+  <span class="ok">✓</span> [warn] 开头卖点不与同店已发重复</pre>
+      </article>
+    </div>
+    <div class="stage-note">真实案例：2026-10-12 发布。照片里一张墙上有手机号，按规则没用。</div>
+  </div>
+</div>
+
+<main>
+  <section id="highlights">
+    <div class="sec-label">Why</div>
+    <h2 class="sec">它不替你编，只替你把话说清楚</h2>
+    <p class="prose">AI 写点评最常见的问题是<b>编</b>：编一个价格、编一句「娃第一次上手也能拉出形状」、把「一般」改成「惊艳」。这个 Skill 先把你说过的整理成事实卡，再让每一句都能对回去。</p>
+    <div class="hl-grid">
+      <div class="hl-card"><div class="tag">fact card</div><h3>一次问完，整理成事实卡</h3><p>只问缺的几项：店名、人均、最满意和最想吐槽的点、和谁去、几星。<b>事实卡里只有你说过的和照片里看得到的。</b></p></div>
+      <div class="hl-card"><div class="tag">numbers</div><h3>每个数字都要有出处</h3><p>正文里出现事实卡里没有的数字，内容检查直接拦。正文写的人均和人均栏对不上，也拦。</p></div>
+      <div class="hl-card"><div class="tag">review ≠ note</div><h3>评价和笔记各写各的</h3><p>评价写给「在做决定的人」：打分、体验、避雷。笔记写给「在找去处的人」：路线、机位、时段。<b>开头卖点不能是同一个。</b></p></div>
+      <div class="hl-card"><div class="tag">category</div><h3>品类必写项自动提醒</h3><p>亲子体验要写适合几岁、费用、时长、交通、能不能吃饭；餐饮要写价格、口感、排队。缺哪项就提醒。</p></div>
+      <div class="hl-card"><div class="tag">privacy</div><h3>照片先过一遍</h3><p>拍到手机号、二维码的必须删；拍到陌生人或别家孩子正脸的标出来，<b>由你决定</b>。</p></div>
+      <div class="hl-card"><div class="tag">hand-off</div><h3>整理好，你自己发</h3><p>照片按上传顺序编号、文案存成 <code>文案.txt</code>，星级和人均写在末尾。打开点评 App 照着发就行。</p></div>
+    </div>
+  </section>
+
+  <section id="flow">
+    <div class="sec-label">Flow</div>
+    <h2 class="sec">一次完整的流程</h2>
+    <div class="rules">
+      <div class="rule"><h3>问一次</h3><p>只问缺的，一次问完，别连环追问。照片里的价目表、菜名、门头也记进事实卡。</p></div>
+      <div class="rule"><h3>定类型</h3><p>没说就写评价。两种都要时，两篇必须各有新信息，不能互相改写。</p></div>
+      <div class="rule"><h3>按品类写</h3><p>开头写当下状态 → 具体细节（每点带一个数字）→ 实用信息 → <b>一个读者答得上来的问题收尾</b>。</p></div>
+      <div class="rule"><h3>过内容检查</h3><p>block 必须改到通过，warn 告诉你。拦极限词、站外导流、网感堆砌词，查数字出处和人均一致。</p></div>
+      <div class="rule"><h3>交付</h3><p>正文、标签分开放方便复制，附图片顺序。你要发时，再整理成手动发布包。</p></div>
+    </div>
+  </section>
+
+  <section id="categories">
+    <div class="sec-label">Categories</div>
+    <h2 class="sec">5 个品类，各有必写项</h2>
+    <p class="prose">规则在 <code>references/category_rules.json</code>，可以自己加品类。</p>
+    <div class="tbl-wrap"><table class="tbl">
+      <thead><tr><th>品类</th><th>例子</th><th>必写项（缺了会提醒）</th></tr></thead>
+      <tbody>
+        <tr><td>餐饮</td><td>火锅、烧烤、日料、咖啡、茶饮、甜品</td><td>价格、口感或味道、排队或位置</td></tr>
+        <tr><td>亲子体验</td><td>遛娃、陶艺、手工 DIY、研学、农场</td><td>适合年龄或人群、费用、时长或节奏、交通或停车、配套</td></tr>
+        <tr><td>美容美发</td><td>美甲、理发、烫染、皮肤管理、SPA</td><td>价格、是否推销、时长或预约</td></tr>
+        <tr><td>休闲娱乐</td><td>密室、剧本杀、骑行、露营、景点</td><td>价格、时长、预约或人数</td></tr>
+        <tr><td>酒店民宿</td><td>酒店、民宿、客栈</td><td>隔音、水压或卫浴、早餐、位置或交通</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="rules">
+    <div class="sec-label">Red lines</div>
+    <h2 class="sec">六条红线</h2>
+    <div class="rules">
+      <div class="rule"><h3>只写事实</h3><p>只写你说过的和照片里看得到的，不编数字、不编感受。</p></div>
+      <div class="rule"><h3>不改你的评价</h3><p>你说「一般」就写「一般」，可以写得更具体，不会改成夸奖。<b>星级必须是你自己给的分。</b></p></div>
+      <div class="rule"><h3>不造假</h3><p>不代写虚假好评，不刷评，不冒充顾客，不帮商家写好评。</p></div>
+      <div class="rule"><h3>合规</h3><p>不用广告法极限词，不留手机号、微信号、二维码等站外联系方式。</p></div>
+      <div class="rule"><h3>差评讲事实</h3><p>差评只写事实和感受，不攻击商家。</p></div>
+      <div class="rule"><h3>不承诺结果</h3><p>不承诺流量、优质评价或审核通过。</p></div>
+    </div>
+  </section>
+
+  <section id="install">
+    <div class="sec-label">Install · Free</div>
+    <h2 class="sec">clone 下来，链进 Skill 目录</h2>
+    <p class="prose">支持 Claude Code、Cursor、Codebuddy 等能加载 Agent Skill 的工具。<b>不需要装任何依赖</b>，有 Python 3 就行，Windows / Linux / macOS 都能用。</p>
+    <div class="install">
+      <div class="ch"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="lab">free · once</span></div>
+      <pre><span class="p">$</span> <span class="o">git clone</span> https://github.com/huiyonghkw/dianping-review-skill.git
+<span class="p">$</span> <span class="o">ln -s</span> "$PWD/dianping-review-skill" ~/.claude/skills/dianping-review-skill
+<span class="cm"># 然后把照片发给 AI，说「帮我写个点评」</span></pre>
+    </div>
+    <div class="say">
+      <span>「刚吃完帮我写个点评」</span>
+      <span>「把这几张图整理成笔记」</span>
+      <span>「评价和笔记都要」</span>
+      <span>「帮我整理好，我自己发」</span>
+    </div>
+  </section>
+
+  <section id="buy">
+    <div class="sec-label">Pro · ¥49</div>
+    <h2 class="sec">Pro：替你发，替你复盘</h2>
+    <p class="buy-sub">macOS · Mac 微信大众点评小程序 · 含一年更新</p>
+    <p class="prose">免费版是完整的写作工具，不是试用版。Pro 在同一套写作规则上，加上<b>发出去</b>和<b>越写越好</b>这两段。两个版本的 Skill 名都是 <code>dianping-review-skill</code>，升级时把整个文件夹换成 Pro 即可。</p>
+    <div class="tbl-wrap"><table class="tbl">
+      <thead><tr><th></th><th>免费版 · MIT-0</th><th>Pro · ¥49</th></tr></thead>
+      <tbody>
+        <tr><td>写评价和笔记、内容检查、品类必写项</td><td class="y">✓</td><td class="y">✓</td></tr>
+        <tr><td>手动发布包：照片编号 + 文案文件</td><td class="y">✓ 任何系统</td><td class="y">✓</td></tr>
+        <tr><td>写作经验库</td><td>基础版</td><td class="y">持续更新：带真实复盘数据</td></tr>
+        <tr><td>手机交接：iCloud 相册 + 备忘录，发完一条命令清理</td><td class="n">—</td><td class="y">✓</td></tr>
+        <tr><td>Mac 微信小程序代发：核对店名，停在发布前给你看预览，你确认才发</td><td class="n">—</td><td class="y">✓</td></tr>
+        <tr><td>复盘：发布 3 天后采集浏览、点赞、评论，结论写回经验库</td><td class="n">—</td><td class="y">✓</td></tr>
+        <tr><td>一年更新</td><td class="n">—</td><td class="y">✓</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="buy-steps">
+      <div class="buy-step"><div class="sq">01</div><div><div class="tt">付款 ¥49</div><div class="ds">扫下面任意一个码，微信支付、支付宝都行。</div></div></div>
+      <div class="buy-step"><div class="sq">02</div><div><div class="tt">加我，发付款截图</div><div class="ds">微信 <code>hekouwang</code>，备注「点评Pro」。</div></div></div>
+      <div class="buy-step"><div class="sq">03</div><div><div class="tt">收 Pro 包，换掉免费版文件夹</div><div class="ds">我私发 Pro 包。解压后替换 <code>~/.claude/skills/dianping-review-skill</code>，按包里 README 装好运行环境（<code>uv</code> + <code>cliclick</code>，给终端开「辅助功能」和「屏幕录制」权限）。</div></div></div>
+    </div>
+
+    <div class="qrgrp">
+      <div class="ghd"><span class="n">01</span>付款 · 二选一</div>
+      <div class="qr">
+        <div class="qrbox"><img src="images/pay-wechat.png" alt="微信支付收款码" width="560" height="596" loading="lazy"><div class="lbl"><b>微信支付</b> · ¥49</div></div>
+        <div class="qrbox"><img src="images/pay-alipay.png" alt="支付宝收款码" width="560" height="622" loading="lazy"><div class="lbl"><b>支付宝</b> · ¥49</div></div>
+      </div>
+    </div>
+    <div class="qrgrp">
+      <div class="ghd"><span class="n">02</span>然后加我</div>
+      <div class="qr">
+        <div class="qrbox"><img src="images/wechat-qr.png" alt="微信加好友二维码" width="560" height="560" loading="lazy"><div class="lbl"><b>扫码加我</b></div></div>
+        <div class="wxid">
+          <div class="k">或者直接搜微信号</div>
+          <div class="id">hekouwang</div>
+          <div class="n">把付款截图发我，备注「点评Pro」，我私发 Pro 包。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ask"><span class="lb">公众号</span>更多 AI 实战拆解，关注公众号 <b>会勇禾口王的AI笔记</b>。</div>
+    <div class="ask"><span class="lb">risk</span><b>自动化发布违反大众点评用户协议，有触发风控的可能。</b>Pro 每次发布都停在预览、你确认才提交，频控默认每类内容每天 1 条；是否使用由你决定。</div>
+    <div class="ask"><span class="lb">license</span>Pro 包仅供个人使用，请勿二次分发。免费版是 MIT-0（公开仓 <code>LICENSE</code>）。</div>
+  </section>
+
+  <p class="sources">
+    <b>来源</b><br>
+    免费版仓库 · <a href="https://github.com/huiyonghkw/dianping-review-skill" target="_blank" rel="noopener">huiyonghkw/dianping-review-skill</a><br>
+    Skill 指令 · <a href="https://github.com/huiyonghkw/dianping-review-skill/blob/main/SKILL.md" target="_blank" rel="noopener">SKILL.md</a><br>
+    品类规则 · <a href="https://github.com/huiyonghkw/dianping-review-skill/blob/main/references/category_rules.json" target="_blank" rel="noopener">references/category_rules.json</a>
+  </p>
+
+  <footer>
+    <div class="foot-brand">会勇禾口王的AI笔记</div>
+    <div class="foot-meta">
+      <a href="https://github.com/huiyonghkw/dianping-review-skill" target="_blank" rel="noopener">GitHub</a> · MIT-0 · dianping-review-skill
+    </div>
+  </footer>
+</main>
+
+<script>
+(function(){
+  var buttons = document.querySelectorAll('.tog button');
+  buttons.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var id = btn.getAttribute('data-pane');
+      document.querySelectorAll('.pane').forEach(function(p){ p.classList.toggle('on', p.id === 'pane-' + id); });
+      buttons.forEach(function(b){ b.classList.toggle('on', b === btn); });
+    });
+  });
+  var prog = document.getElementById('prog');
+  function onScroll(){
+    var h = document.documentElement, max = h.scrollHeight - h.clientHeight;
+    prog.style.width = (max > 0 ? (h.scrollTop / max * 100) : 0) + '%';
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+})();
+</script>
+</body>
+</html>

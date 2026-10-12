@@ -3,6 +3,8 @@
 **把你刚拍的店铺照片和一句话口述，整理成一条真实、不编造、别人愿意看完的大众点评评价或探店笔记。**
 写完还能把照片按上传顺序编号、文案存成文件，你在点评 App 里照着发就行。只需要 Python 3，任何系统都能用。
 
+主页：[huiyonghkw.github.io/dianping-review-skill](https://huiyonghkw.github.io/dianping-review-skill/) · 公众号：会勇禾口王的AI笔记
+
 ## 适合谁
 
 | 适合 | 不适合 |
@@ -70,7 +72,7 @@ ln -s "$PWD/dianping-review-skill" ~/.claude/skills/dianping-review-skill
 | 复盘：发布 3 天后采集浏览、点赞、评论，经验回写 | — | ✅ macOS |
 
 两个版本的 Skill 名都是 `dianping-review-skill`，升级时把整个文件夹换成 Pro 即可。
-Pro 版获取：联系 [@huiyonghkw](https://github.com/huiyonghkw)。
+Pro 版 ¥49（含一年更新），购买方式见[主页「Pro」一节](https://huiyonghkw.github.io/dianping-review-skill/#buy)，或关注公众号「会勇禾口王的AI笔记」。
 
 ## 目录结构
 
@@ -84,7 +86,8 @@ Pro 版获取：联系 [@huiyonghkw](https://github.com/huiyonghkw)。
 │   ├── content_gate.py       # 内容检查
 │   ├── manual_package.py     # 手动发布包：内容检查 + 照片编号 + 文案
 │   └── textmatch.py          # 文本容错匹配
-└── tests/                    # python3 -m unittest discover -s tests
+├── tests/                    # python3 -m unittest discover -s tests
+└── docs/                     # GitHub Pages 主页
 ```
 
 ## 红线
