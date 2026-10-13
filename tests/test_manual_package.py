@@ -41,22 +41,39 @@ class StarValidationTest(unittest.TestCase):
 
 class StageManualTest(unittest.TestCase):
     def test_stage(self):
+        from PIL import Image
         with tempfile.TemporaryDirectory() as tmp:
             tmp = Path(tmp)
             imgs = []
-            for name in ("IMG_2921.jpg", "IMG_2893.jpg"):
-                (tmp / name).write_bytes(b"jpg")
+            for name, color in (("IMG_2921.png", (70, 120, 180)), ("IMG_2893.png", (40, 90, 50))):
+                Image.new("RGB", (900, 600), color).save(tmp / name)
                 imgs.append(str(tmp / name))
             payload = {"shop": "同治龙窑", "body": BODY, "facts": FACTS, "stars": 4.5,
-                       "images": imgs, "tags": ["#成都亲子", "#陶艺体验"]}
+                       "images": imgs, "tags": ["#成都亲子", "#陶艺体验"],
+                       "cover": {"title": "双流 · 同治龙窑",
+                                 "lines": ["费用：陶罐2个100元", "亮点：老师在旁边指导"]}}
             with mock.patch.object(mpkg, "load_sibling_hooks", return_value=[]):
                 d = mpkg.stage_manual(payload, "review", str(tmp / "out"))
             self.assertEqual(d, tmp / "out" / "评价")
             self.assertEqual(sorted(p.name for p in d.iterdir()),
-                             ["01-IMG_2921.jpg", "02-IMG_2893.jpg", "文案.txt"])
+                             ["01-封面.jpg", "02-IMG_2921.png", "03-IMG_2893.png", "文案.txt"])
+            with Image.open(d / "01-封面.jpg") as cover_im:
+                self.assertEqual(cover_im.size, (1080, 1440))
             text = (d / "文案.txt").read_text(encoding="utf-8")
             self.assertIn("总体星级：4.5", text)
             self.assertIn("#成都亲子 #陶艺体验", text)
+            self.assertIn("<双流 · 同治龙窑>", text)
+            self.assertIn("费用：陶罐2个100元", text)
+
+    def test_images_require_cover(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            img = Path(tmp) / "a.png"
+            img.write_bytes(b"png")
+            payload = {"shop": "同治龙窑", "body": BODY, "facts": FACTS, "stars": 4,
+                       "images": [str(img)]}
+            with self.assertRaises(mpkg.PublishError) as e:
+                mpkg.stage_manual(payload, "review", tmp, no_gate=True)
+            self.assertEqual(e.exception.code, "E404")
 
     def test_gate_blocks_staging(self):
         payload = {"shop": "同治龙窑", "body": BODY + "全网第一。", "facts": FACTS, "stars": 4}

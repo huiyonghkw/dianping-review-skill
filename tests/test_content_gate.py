@@ -125,6 +125,42 @@ class CategoryRulesTest(unittest.TestCase):
         self.assertEqual(missing_category_info(body, "亲子体验"), [])
 
 
+class ConversionAndStyleTest(unittest.TestCase):
+    def test_hard_sell_blocks(self):
+        report = check("", REVIEW_BODY + "错过后悔，赶紧冲。", "review", FACTS)
+        self.assertFalse(get(report, "硬推销")["pass"])
+        self.assertFalse(report["pass"])
+
+    def test_merchant_voice_blocks(self):
+        report = check("", REVIEW_BODY + "本店限时优惠。", "review", FACTS)
+        self.assertFalse(get(report, "商家口吻")["pass"])
+
+    def test_ai_cliche_blocks(self):
+        report = check("", "值得一提的是，" + REVIEW_BODY, "review", FACTS)
+        self.assertFalse(get(report, "AI腔套话")["pass"])
+        body = REVIEW_BODY + "这不仅是一杯咖啡，更是一种生活态度。"
+        self.assertFalse(get(check("", body, "review", FACTS), "AI腔套话")["pass"])
+
+    def test_action_and_not_for_warn_only(self):
+        report = check("", REVIEW_BODY, "review", FACTS)
+        self.assertTrue(report["pass"])
+        self.assertTrue(get(report, "行动信息")["pass"])
+        self.assertFalse(get(report, "写了不适合谁")["pass"])
+        body = REVIEW_BODY.replace("饭点前后人会多一些。", "饭点前后人会多一些，想安静聊天的不太适合。")
+        self.assertTrue(get(check("", body, "review", FACTS), "写了不适合谁")["pass"])
+
+    def test_dash_parallel_uniform_warn(self):
+        body = REVIEW_BODY + "环境——很好——安静。"
+        self.assertFalse(get(check("", body, "review", FACTS), "破折号")["pass"])
+        par = "我喜欢它的拿铁，我喜欢它的座位，我喜欢它的音乐。" + REVIEW_BODY
+        report = check("", par, "review", FACTS)
+        self.assertTrue(report["pass"])
+        self.assertFalse(get(report, "无排比三连")["pass"])
+        flat = "这家咖啡店很安静。拿铁味道还不错。座位离窗户很近。店员说话很客气。我们坐了挺久的。"
+        self.assertFalse(get(check("", flat, "review", FACTS), "长短句交错")["pass"])
+        self.assertTrue(get(check("", REVIEW_BODY, "review", FACTS), "长短句交错")["pass"])
+
+
 class MiscTest(unittest.TestCase):
     def test_first_person_not_double_counted(self):
         self.assertEqual(count_first_person("我们来了，我点了"), 2)
@@ -134,6 +170,15 @@ class MiscTest(unittest.TestCase):
         self.assertFalse(get(report, "站外导流")["pass"])
         report = check("", REVIEW_BODY + "电话 13812345678", "review", FACTS)
         self.assertFalse(get(report, "站外导流")["pass"])
+
+    def test_vx_shorthand_needs_context(self):
+        # 光秃秃的 VX 不拦（密室主题名、品牌名里会出现）
+        report = check("", REVIEW_BODY + "玩的是 VX 主题，机关不少", "review", FACTS)
+        self.assertTrue(get(report, "站外导流")["pass"])
+        # 有联系意图的三种语境才拦
+        for ctx in ("加VX abc123", "VX号 abc123", "VX: abc123"):
+            report = check("", REVIEW_BODY + ctx, "review", FACTS)
+            self.assertFalse(get(report, "站外导流")["pass"], ctx)
 
 
 if __name__ == "__main__":

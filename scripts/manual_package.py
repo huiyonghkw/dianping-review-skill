@@ -1,16 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-manual_package.py — 手动发布整理（仅标准库，任何系统可用）
+manual_package.py — 手动发布整理
 
-过内容门禁 → 图片按上传顺序编号 → 生成文案.txt，交用户在点评 App 里手动发布。
+过内容门禁 → 首图叠标题 → 原图按上传顺序编号 → 生成文案.txt，交用户在点评 App 里手动发布。
+合成首图需要 Pillow（python3 -m pip install pillow）；没有图时仍只用标准库。
 
 用法:
   manual_package.py --json post.json [--kind note|review] [--out-dir DIR] [--no-gate]
       post.json: {"shop": "品牌（分店）", "title": "笔记标题", "body": "…", "tags": ["#…"],
                   "images": ["/abs/01.jpg", …], "facts": {…事实卡…},
+                  "cover": {"title": "<大邑 · 赵公山东线>",
+                            "lines": ["起点：赵公山游客中心", "用时：3h"],
+                            "picks": [0, 1, 2]},
                   "stars": 4.5, "scores": {"口味": 4}, "per_capita": 38}
-      默认输出到 ~/Downloads/<店名>-发布/<评价|笔记>/
+      默认输出到当前项目的 dist/<店名>-发布/<评价|笔记>/（--out-dir 可覆盖）
+      有图时多一张 01-封面.jpg（1080×1440），原图从 02 开始编号。
 
 退出码: 0 成功 1 门禁未过或输入错误
 """
@@ -23,13 +28,14 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from content_gate import check, format_report, load_sibling_hooks  # noqa: E402
+from cover_card import CoverError, paint_cover, validate_cover  # noqa: E402
 
 IMAGE_SUFFIXES = (".jpg", ".jpeg", ".png")
 KIND_LABEL = {"review": "评价", "note": "笔记"}
 
 
 class PublishError(Exception):
-    """本文件用到 E401 门禁未过 / E402 字段或星级不合法 / E403 图片问题；全表见 Pro 版的发布文档。"""
+    """本文件用到 E401 门禁未过 / E402 字段或星级不合法 / E403 图片问题 / E404 首图标题；全表见 Pro 版的发布文档。"""
 
     def __init__(self, message: str, code: str = ""):
         super().__init__(message)
@@ -96,23 +102,51 @@ def manual_text(payload: dict, kind: str) -> str:
         meta.append(f"人均：{payload['per_capita']}")
     if meta:
         lines += ["", "—— 发布时填写 ——"] + meta
+    cover = payload.get("cover") or {}
+    if cover.get("title") and cover.get("lines"):
+        lines += ["", "—— 首图上的字 ——", cover["title"], *cover["lines"]]
     return "\n".join(lines) + "\n"
 
 
 def stage_manual(payload: dict, kind: str, out_root: str = "", no_gate: bool = False) -> Path:
     images = validate_payload(payload, kind, no_gate, allow_half=True)
     title = payload.get("title", "") if kind == "note" else ""
+    cover_spec = None
+    if images:
+        if not payload.get("cover"):
+            raise PublishError("有图就要首图标题 cover（title + 2–4 行 lines），否则封面留不住人", code="E404")
+        try:
+            cover_spec = validate_cover(payload["cover"], len(images), payload.get("facts"),
+                                        check_facts=not no_gate)
+        except CoverError as e:
+            raise PublishError(str(e), code="E404") from e
+        payload = {**payload, "cover": cover_spec}
     if not no_gate:
         run_gate(title, payload["body"], kind, payload)
-    root = Path(out_root) if out_root else Path.home() / "Downloads" / f"{payload['shop']}-发布"
+    root = Path(out_root) if out_root else Path.cwd() / "dist" / f"{payload['shop']}-发布"
     d = root / KIND_LABEL[kind]
     if d.exists():
+        print(f"⚠️ 覆盖已存在的发布目录 {d}（之前手动改过的内容会丢失）")
         shutil.rmtree(d)
     d.mkdir(parents=True)
-    for i, img in enumerate(images, 1):
-        shutil.copy(img, d / f"{i:02d}-{img.name}")
-    (d / "文案.txt").write_text(manual_text(payload, kind), encoding="utf-8")
-    print(f"✅ 已整理到 {d}（{len(images)} 张图按上传顺序编号 + 文案.txt）")
+    try:
+        start = 1
+        if cover_spec:
+            paint_cover(images, cover_spec, d / "01-封面.jpg")
+            start = 2
+        for i, img in enumerate(images, start):
+            shutil.copy(img, d / f"{i:02d}-{img.name}")
+        (d / "文案.txt").write_text(manual_text(payload, kind), encoding="utf-8")
+    except CoverError as e:
+        shutil.rmtree(d, ignore_errors=True)
+        raise PublishError(str(e), code="E404") from e
+    except Exception:
+        shutil.rmtree(d, ignore_errors=True)
+        raise
+    if cover_spec:
+        print(f"✅ 已整理到 {d}（封面 1 张 + 原图 {len(images)} 张 + 文案.txt）")
+    else:
+        print(f"✅ 已整理到 {d}（无图，只有文案.txt）")
     return d
 
 
@@ -120,7 +154,7 @@ def main():
     ap = argparse.ArgumentParser(description="手动发布整理：门禁 + 图片编号 + 文案")
     ap.add_argument("--json", required=True, help="post.json")
     ap.add_argument("--kind", default="note", choices=["note", "review"])
-    ap.add_argument("--out-dir", help="默认 ~/Downloads/<店名>-发布/")
+    ap.add_argument("--out-dir", help="默认 ./dist/<店名>-发布/")
     ap.add_argument("--no-gate", action="store_true")
     args = ap.parse_args()
     try:

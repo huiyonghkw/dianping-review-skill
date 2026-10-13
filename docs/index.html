@@ -36,7 +36,7 @@
   <div class="mx-auto grid w-[min(1120px,calc(100%-32px))] items-center gap-9 md:w-[min(1120px,calc(100%-48px))] md:grid-cols-[1.15fr_.85fr] md:gap-16">
     <div>
       <div class="inline-flex flex-wrap items-center gap-x-2 gap-y-1 rounded-full border border-rule2 bg-slip/70 px-3.5 py-1.5 font-mono text-[12.5px] text-ink2">
-        <span class="font-bold text-ink">dianping-review-skill</span><span class="text-ink3">·</span><span>v1.0.0</span><span class="text-ink3">·</span><span>MIT-0</span><span class="text-ink3">·</span><span>Agent Skill</span>
+        <span class="font-bold text-ink">dianping-review-skill</span><span class="text-ink3">·</span><span>v1.1.0</span><span class="text-ink3">·</span><span>MIT-0</span><span class="text-ink3">·</span><span>Agent Skill</span>
       </div>
       <h1 class="mt-6 text-[clamp(48px,7vw,92px)] leading-[1.04] font-black tracking-[-.03em]">大众点评<br><em class="bg-linear-to-r from-accent to-accent-deep bg-clip-text not-italic text-transparent">评价助手</em></h1>
       <p class="mt-5 text-[clamp(22px,2.6vw,30px)] leading-snug font-black text-ink2">每个数字，都对得上账。</p>
@@ -110,8 +110,8 @@
         <li><span class="n">01</span><h3>事实卡</h3><p>一次问清价格、时长、交通这些缺的事实，连同照片里看得到的，记成一张卡。</p><span class="tag bg-accent-soft text-accent-ink">免费</span></li>
         <li><span class="n">02</span><h3>评价 + 笔记</h3><p>同一家店写两篇，开头卖点不撞车；附标题、标签、图片顺序和你给的星级。</p><span class="tag bg-accent-soft text-accent-ink">免费</span></li>
         <li><span class="n">03</span><h3>品类必写项</h3><p>餐饮、美容美发、休闲娱乐、亲子、酒店民宿，各有读者最想先知道的几件事。</p><span class="tag bg-accent-soft text-accent-ink">免费</span></li>
-        <li><span class="n">04</span><h3>内容检查</h3><p>数字没出处、人均前后不一、广告法极限词、手机号微信，交付前全部拦下。</p><span class="tag bg-accent-soft text-accent-ink">免费</span></li>
-        <li><span class="n">05</span><h3>手动发布包</h3><p>照片按上传顺序编号，文案存成文件，打开点评 App 照着发。</p><span class="tag bg-accent-soft text-accent-ink">免费</span></li>
+        <li><span class="n">04</span><h3>内容检查</h3><p>数字没出处、人均前后不一、广告法极限词、手机号微信、AI 套话、硬推销，交付前全部拦下；没写怎么去、不适合谁会提醒。</p><span class="tag bg-accent-soft text-accent-ink">免费</span></li>
+        <li><span class="n">05</span><h3>手动发布包</h3><p>首图叠上白字标题和几行事实，其余照片按顺序编号，文案存成文件，打开点评 App 照着发。</p><span class="tag bg-accent-soft text-accent-ink">免费</span></li>
         <li><span class="n">06</span><h3>代发与手机交接</h3><p>Mac 微信小程序代发，停在预览等你确认；发不了的店经 iCloud 送到手机。</p><span class="tag bg-ink text-paper">Pro</span></li>
         <li><span class="n">07</span><h3>数据复盘</h3><p>发布 3 天后采集浏览、点赞、评论，结论写回经验库，下一篇写得更好。</p><span class="tag bg-ink text-paper">Pro</span></li>
       </ol>
@@ -180,7 +180,8 @@
 <span class="text-[#8f8878]"># 或者从 ClawHub 装</span>
 <span class="text-[#ff7a45]">$</span> clawhub install dianping-review-skill
 <span class="text-[#8f8878]"># Claude Code、Cursor、Codebuddy 都能用
-# 只需要 Python 3，Windows / Linux / macOS 都行</span></div>
+# 写作和检查只需要 Python 3
+# 合成带标题的首图：python3 -m pip install pillow</span></div>
       <div class="flex flex-col gap-3">
         <p class="text-[15px] text-ink3">把照片发给 AI，然后说：</p>
         <div class="self-start rounded-[18px_18px_18px_4px] border border-rule bg-slip px-4 py-2.5 text-base font-bold">刚吃完，帮我写个点评</div>
@@ -200,12 +201,12 @@
       <div class="plan rv flex flex-col rounded-slip border-[1.5px] border-rule2 bg-slip p-7.5">
         <div class="text-[15px] font-extrabold text-ink2">免费版 · MIT-0</div>
         <div class="mt-2 mb-0.5 font-mono text-[44px] leading-[1.1] font-bold">¥0</div>
-        <div class="text-sm text-ink3">任何系统 · 只需 Python 3</div>
+        <div class="text-sm text-ink3">任何系统 · 写作只需 Python 3</div>
         <ul class="mt-5.5 mb-6.5 grid gap-2.25 text-[15px] [&>li]:grid [&>li]:grid-cols-[22px_1fr] [&>li]:gap-1.5 [&>li]:text-ink2">
           <li>写评价和笔记，事实卡不脑补</li>
           <li>内容检查：数字出处、人均一致、极限词、站外导流</li>
           <li>5 个品类的必写项</li>
-          <li>手动发布包：照片按上传顺序编号 + 文案文件</li>
+          <li>手动发布包：带标题的首图 + 照片编号 + 文案文件</li>
           <li>写作经验库基础版</li>
           <li class="no">代发、手机交接、复盘</li>
         </ul>

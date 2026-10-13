@@ -16,10 +16,15 @@ content_gate.py — 发布前内容门禁（智能体铁律的代码化）
     5. 第一人称锚点 ≥ 2
     6. 正文字数硬区间；笔记标题必填
     7. 人均一致：正文写的「人均 X」必须和人均栏（--per-capita 或 facts.per_capita）对得上
+    8. 硬推销词（赶紧冲、错过后悔…）：引导消费靠信息，不靠喊
+    9. 商家口吻（限时优惠、本店、为您打造…）：消费者不替商家传话
+   10. AI 腔套话（值得一提的是、总的来说、不仅…更是…）
   warn（提示修改，不拦截）
     信息密度（数字 ≥ 2）、感叹号 ≤ 1、emoji ≤ 3、推荐字数区间、推荐标题长度、
     结尾提问、开头卖点与同店已发内容重复（--shop 时读发布回执）、
-    品类必写信息（按 facts.category 查 references/category_rules.json）
+    品类必写信息（按 facts.category 查 references/category_rules.json）、
+    行动信息（怎么买 / 什么时候去 / 怎么去）、写了不适合谁、
+    破折号 ≤ 1、排比三连、句长过于整齐
 
 事实卡 facts：访谈 + 照片识别得到的结构化事实（任意 JSON），例如
   {"shop": "莫摧咖啡（三圣乡店）", "per_capita": 38, "items": ["脏脏拿铁 32 元"],
@@ -59,8 +64,10 @@ ABSOLUTE_EXEMPT = [
     "最好先", "最好不要", "最好是",
 ]
 
+# VX/vx 简写只在有联系意图的语境里才拦：加VX / VX号 / VX: 内容；光秃秃一个 VX 不拦
 DIVERSION_RE = re.compile(
-    r"微信号|加微信|加\s*[vV]\b|[vV][xX]|[wW][xX]号|二维码|私聊|私信我|加我|[qQ][qQ]\s*\d|1[3-9]\d{9}"
+    r"微信号|加微信|加\s*[vV]\b|加\s*[vV][xX]|[vV][xX]\s*号|[vV][xX]\s*[:：]\s*\S|[wW][xX]号"
+    r"|二维码|私聊|私信我|加我|[qQ][qQ]\s*\d|1[3-9]\d{9}"
 )
 
 AI_FLAVOR_WORDS = [
@@ -69,6 +76,33 @@ AI_FLAVOR_WORDS = [
     "被硬控", "硬控我", "拿捏了", "闭眼入",
     "无脑冲", "冲就完了", "听我的", "求求了", "救命!!", "救命！！",
 ]
+
+HARD_SELL_WORDS = [
+    "赶紧冲", "快去买", "快冲", "速冲", "冲鸭", "赶紧下单", "抓紧下单", "手慢无", "先到先得",
+    "错过后悔", "错过等一年", "不去血亏", "不买后悔", "不来后悔", "必须安排", "一定要去", "强烈推荐",
+]
+
+MERCHANT_VOICE_WORDS = [
+    "限时优惠", "限时特价", "下单立减", "下单即送", "到店即送", "欢迎光临", "欢迎大家",
+    "本店", "我们店", "为您带来", "为您打造", "竭诚", "敬请", "期待您的光临",
+]
+
+AI_CLICHE_WORDS = [
+    "值得一提的是", "总的来说", "总而言之", "综上所述", "不得不说", "毫无疑问",
+    "让人流连忘返", "回味无穷", "满满的幸福感", "氛围感拉满", "性价比超高", "体验感很好",
+    "生活态度", "治愈心灵", "匠心", "沉浸式", "打造", "一场味蕾的", "味蕾的盛宴", "视觉盛宴",
+]
+AI_SUBLIME_RE = re.compile(r"不仅仅?是.{0,16}更是|不只是.{0,16}更是|这不是.{0,12}而是一种")
+
+ACTION_SLOTS = {
+    "怎么买": ["团购", "套餐", "原价", "必点", "点了", "点的", "建议点", "买了", "人均", "元", "免费"],
+    "什么时候去": ["工作日", "周末", "上午", "下午", "中午", "晚上", "人少", "错峰", "预约", "排队", "等位", "点前", "点后", "点以后"],
+    "怎么去": ["地铁", "公交", "停车", "自驾", "打车", "步行", "公里", "号门", "出口", "导航"],
+}
+NOT_FOR_RE = re.compile(r"不适合|不太适合|不建议|不推荐|介意.{0,8}(的话|慎)|慎重|慎选|避雷|别点|不用点")
+DASH_LIMIT = 1
+CLAUSE_SPLIT_RE = re.compile(r"[，,。；;！!？?\n]")
+SENTENCE_SPLIT_RE = re.compile(r"[。！!？?\n]")
 
 FIRST_PERSON_RE = re.compile(r"我们|我|本人")
 EXCLAMATION_LIMIT = 1
@@ -226,6 +260,40 @@ def missing_category_info(text: str, category: str, rules: dict = None) -> list:
     return [item for item, words in must.items() if not any(w in text for w in words)]
 
 
+def find_ai_cliches(text: str) -> list:
+    hits = {w for w in AI_CLICHE_WORDS if w in text}
+    hits |= {m.group(0) for m in AI_SUBLIME_RE.finditer(text)}
+    return sorted(hits)
+
+
+def missing_action_slots(text: str) -> list:
+    return [slot for slot, words in ACTION_SLOTS.items() if not any(w in text for w in words)]
+
+
+def parallel_runs(text: str) -> list:
+    """连续 3 个以上分句用同样的两个字开头，读起来像排比模板。"""
+    clauses = [c.strip() for c in CLAUSE_SPLIT_RE.split(text) if len(c.strip()) >= 4]
+    runs, i = [], 0
+    while i < len(clauses):
+        j = i
+        while j + 1 < len(clauses) and clauses[j + 1][:2] == clauses[i][:2]:
+            j += 1
+        if j - i >= 2:
+            runs.append(clauses[i][:2])
+        i = j + 1
+    return runs
+
+
+def uniform_sentences(text: str) -> bool:
+    """5 句以上且句长几乎一样：真人写东西长短句交错。"""
+    lens = [len(s.strip()) for s in SENTENCE_SPLIT_RE.split(text) if len(s.strip()) >= 4]
+    if len(lens) < 5:
+        return False
+    mean = sum(lens) / len(lens)
+    sd = (sum((n - mean) ** 2 for n in lens) / len(lens)) ** 0.5
+    return sd / mean < 0.18
+
+
 def per_capita_mismatches(text: str, per_capita) -> list:
     if per_capita is None:
         return []
@@ -263,6 +331,17 @@ def check(title: str, body: str, kind: str, facts=None, per_capita=None, sibling
     hit_ai = sorted({w for w in AI_FLAVOR_WORDS if w.lower() in text.lower()})
     add("AI味堆砌词", not hit_ai, f"命中: {hit_ai}" if hit_ai else "无")
 
+    hit_cliche = find_ai_cliches(text)
+    add("AI腔套话", not hit_cliche,
+        f"命中: {hit_cliche}（换成具体的事，见 references/style.md）" if hit_cliche else "无")
+
+    hit_sell = sorted({w for w in HARD_SELL_WORDS if w in text})
+    add("硬推销", not hit_sell,
+        f"命中: {hit_sell}（改成读者能照着做的信息：点什么、几点去、怎么去）" if hit_sell else "无")
+
+    hit_merchant = sorted({w for w in MERCHANT_VOICE_WORDS if w in text})
+    add("商家口吻", not hit_merchant, f"命中: {hit_merchant}" if hit_merchant else "无")
+
     nums = NUMBER_RE.findall(text)
     if facts is None:
         add("数字有出处", False, "未提供事实卡 facts，无法校验数字是否编造", level="warn")
@@ -291,6 +370,23 @@ def check(title: str, body: str, kind: str, facts=None, per_capita=None, sibling
 
     asks = ends_with_question(body)
     add("结尾提问", asks, "有" if asks else "结尾没有提问，读者不知道该回什么", level="warn")
+
+    miss_action = missing_action_slots(text)
+    add("行动信息", len(miss_action) <= 1,
+        f"缺: {miss_action}（读者看完要能照着去）" if miss_action else "怎么买、什么时候去、怎么去都写到了",
+        level="warn")
+
+    add("写了不适合谁", bool(NOT_FOR_RE.search(text)),
+        "写到了" if NOT_FOR_RE.search(text) else "没写不适合谁或避雷，推荐读起来像广告", level="warn")
+
+    dashes = text.count("——") + text.replace("——", "").count("—")
+    add(f"破折号≤{DASH_LIMIT}", dashes <= DASH_LIMIT, f"共 {dashes} 个", level="warn")
+
+    runs = parallel_runs(body)
+    add("无排比三连", not runs, f"连续同开头: {runs}" if runs else "无", level="warn")
+
+    flat = uniform_sentences(body)
+    add("长短句交错", not flat, "句子长短太整齐，拆一句长的或并两句短的" if flat else "有变化", level="warn")
 
     if category:
         miss = missing_category_info(text, category)
