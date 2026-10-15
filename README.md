@@ -108,6 +108,10 @@ Pro 版 ¥49（含一年更新），购买方式见[主页「Pro」一节](https
 5. 差评只写事实和感受，不攻击商家。
 6. 不承诺流量、优质评价或审核通过。
 
+## 相关 Skill
+
+- [hekouwang-writer-skill](https://github.com/huiyonghkw/hekouwang-writer-skill)：中文文档写作与改进。点评以外的文档（办事指南、方案、报告、邮件、长篇攻略）交给它。两边同一条底线：只写有出处的事实，数字可对账。
+
 ## License
 
 [MIT-0](LICENSE)：随便用、随便改、可商用，不需要署名。

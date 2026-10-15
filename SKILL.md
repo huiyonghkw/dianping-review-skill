@@ -4,7 +4,7 @@ slug: dianping-review-skill
 displayName: 大众点评评价助手
 summary: 大众点评评价 / 探店笔记写作助手：照片 + 口述 → 不编造的评价和笔记，事实卡对账、品类必写项、内容检查、手动发布包。免费版，纯 Python 标准库。
 homepage: https://huiyonghkw.github.io/dianping-review-skill/
-version: 1.1.0
+version: 1.1.1
 license: MIT-0
 description: >
   大众点评个人用户的评价与探店笔记写作助手（免费版，消费者视角，不做商家运营）。把用户刚拍的店铺照片和口述，
@@ -22,6 +22,7 @@ description: >
   不刷评、不冒充顾客；不用广告法极限词，不留手机号、微信、二维码等站外联系方式；
   不承诺流量、优质评价或审核通过。
   不用于：商家后台与门店运营、美团/小红书等其他平台文案、与点评无关的照片整理。
+  点评以外的中文文档（办事指南、方案、报告、邮件、长篇攻略文档）交给 hekouwang-writer-skill。
 ---
 
 # 大众点评评价助手
@@ -135,3 +136,9 @@ python3 scripts/content_gate.py --kind review --body "…" --facts facts.json --
 ### 6. 交付
 
 正文、标签、首图文字分别放在独立代码块里方便复制（笔记另给标题）。首图文字先写标题，再逐行列出。正文末尾标字数，再用一句话说明第一人称几处、自查改掉了哪几类。最后附图片顺序：封面用哪几张、原图怎么排。
+
+## 协作
+
+点评以外的中文文档交给 [hekouwang-writer-skill](https://github.com/huiyonghkw/hekouwang-writer-skill)（ClawHub / SkillHub 同名），比如办事指南、方案、报告、邮件，或用户想把探店经历整理成一份长篇攻略文档。本 skill 只管点评的评价和笔记。
+
+两边的底线一致：只写有出处的事实，不编数字，不改用户的评价强度。点评正文的门禁以 `content_gate.py` 为准。

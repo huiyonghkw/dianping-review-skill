@@ -41,7 +41,7 @@
 
 | 事实 | 值 |
 |---|---|
-| 版本 | 1.1.0（CHANGELOG 与 SKILL.md frontmatter 同步改） |
+| 版本 | 1.1.1（CHANGELOG 与 SKILL.md frontmatter 同步改） |
 | Python | 3.8+（`content_gate.py` 用了海象运算符） |
 | 单测 | `python3 -m unittest discover -s tests` |
 | 分发 | GitHub Pages（`docs/`）+ SkillHub（frontmatter 的 slug/displayName/summary 等字段是给它要的，运行时不用读） |

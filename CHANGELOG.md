@@ -1,5 +1,11 @@
 # Changelog · dianping-review-skill
 
+## 1.1.1 · 2026-10-15
+
+- 引入协作 skill [hekouwang-writer-skill](https://github.com/huiyonghkw/hekouwang-writer-skill)：点评以外的中文文档（办事指南、方案、报告、邮件、长篇攻略）交给它。SKILL.md 新增「协作」一节，description 的「不用于」写明交接对象。
+- `references/style.md`：装了 hekouwang-writer-skill 时，长笔记可选跑它的锯末词和长句体检，只作提醒，门禁仍以 `content_gate.py` 为准。
+- README 新增「相关 Skill」。
+
 ## 1.1.0 · 2026-10-13
 
 - 首图叠字：发布包的第一张是 3:4 封面，白字黑边标题 `<地点 · 名称>`，下面 2–4 行浅黄事实。原图从 02 开始编号。
