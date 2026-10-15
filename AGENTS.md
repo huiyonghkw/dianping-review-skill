@@ -8,6 +8,7 @@
 - **产品**：大众点评评价/探店笔记写作 Skill（免费版，MIT-0）。终端用户 clone 后 symlink 进
   `~/.claude/skills/` 使用，不以本目录为 cwd 工作——本文件的读者基本只有开发会话。
 - **技术栈**：纯 Python 3 标准库；Pillow 仅合成首图时用，可选。
+- **运行时依赖**：hekouwang-writer-skill >= 1.1.0。`scripts/writer_bridge.py` 用子进程调它四个脚本的 `--json` 输出；它的 JSON 字段改了，这里要同步改。
 - **新代码放哪**：确定性逻辑 → `scripts/`；写法规范 → `references/`；给模型的指令 → `SKILL.md`；回归 → `tests/`。
 
 ## 工作风格
@@ -34,6 +35,8 @@
 ### Do NOT
 
 - 不把 Pillow 提成硬依赖：写作和内容检查路径必须纯标准库。
+- 不把 hekouwang-writer-skill 的脚本复制进本仓库：依赖它，不 fork 它，规则只在那边维护。
+- 不给门禁加跳过写作规范的开关：依赖缺失就拦。
 - 不提交 `dist/`、`__pycache__/`（.gitignore 已兜住，别 `git add -f`）。
 - 不在 SKILL.md 教通用写法：只装模型推不出来的项目/平台私有事实。
 
@@ -41,9 +44,9 @@
 
 | 事实 | 值 |
 |---|---|
-| 版本 | 1.1.1（CHANGELOG 与 SKILL.md frontmatter 同步改） |
+| 版本 | 1.2.0（CHANGELOG 与 SKILL.md frontmatter 同步改） |
 | Python | 3.8+（`content_gate.py` 用了海象运算符） |
-| 单测 | `python3 -m unittest discover -s tests` |
+| 单测 | `python3 -m unittest discover -s tests`（写作规范相关用例需要 hekouwang-writer-skill 在同级目录或 `HEKOUWANG_WRITER_SKILL_DIR`；首图用例需要 Pillow） |
 | 分发 | GitHub Pages（`docs/`）+ SkillHub（frontmatter 的 slug/displayName/summary 等字段是给它要的，运行时不用读） |
 
 ## 目录结构

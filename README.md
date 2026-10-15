@@ -1,7 +1,7 @@
 # dianping-review-skill · 大众点评评价助手（免费版）
 
 **把你刚拍的店铺照片和一句话口述，整理成一条真实、不编造、别人愿意看完的大众点评评价或探店笔记。**
-写完还能把照片按上传顺序编号、文案存成文件，你在点评 App 里照着发就行。写作只需要 Python 3；合成带标题的首图时再装 Pillow。
+写完还能把照片按上传顺序编号、文案存成文件，你在点评 App 里照着发就行。写作只需要 Python 3 和 [hekouwang-writer-skill](https://github.com/huiyonghkw/hekouwang-writer-skill)（内容检查按它的写作规范把关）；合成带标题的首图时再装 Pillow。
 
 主页：[huiyonghkw.github.io/dianping-review-skill](https://huiyonghkw.github.io/dianping-review-skill/) · 公众号：会勇禾口王的AI笔记
 
@@ -46,10 +46,14 @@
 
 ```bash
 git clone https://github.com/huiyonghkw/dianping-review-skill.git
+git clone https://github.com/huiyonghkw/hekouwang-writer-skill.git
 ln -s "$PWD/dianping-review-skill" ~/.claude/skills/dianping-review-skill
+ln -s "$PWD/hekouwang-writer-skill" ~/.claude/skills/hekouwang-writer-skill
 ```
 
-然后把照片发给 AI，说「帮我写个点评」。写作和检查不需要装任何依赖，有 Python 3 就行。要合成带标题的首图时，再装一次 Pillow：
+ClawHub 用户：`clawhub install dianping-review-skill && clawhub install hekouwang-writer-skill`。
+
+然后把照片发给 AI，说「帮我写个点评」。内容检查依赖 hekouwang-writer-skill（>= 1.1.0），没装会直接拦下并提示安装；除此之外只要 Python 3。要合成带标题的首图时，再装一次 Pillow：
 
 ```bash
 python3 -m pip install pillow
@@ -108,9 +112,9 @@ Pro 版 ¥49（含一年更新），购买方式见[主页「Pro」一节](https
 5. 差评只写事实和感受，不攻击商家。
 6. 不承诺流量、优质评价或审核通过。
 
-## 相关 Skill
+## 依赖
 
-- [hekouwang-writer-skill](https://github.com/huiyonghkw/hekouwang-writer-skill)：中文文档写作与改进。点评以外的文档（办事指南、方案、报告、邮件、长篇攻略）交给它。两边同一条底线：只写有出处的事实，数字可对账。
+- [hekouwang-writer-skill](https://github.com/huiyonghkw/hekouwang-writer-skill)（>= 1.1.0，必装）：中文文档写作规范。内容检查调用它的锯末词、长句、敏感信息、算术对账规则，点评正文同时要过它的规范。点评以外的文档（办事指南、方案、报告、邮件、长篇攻略）也交给它。
 
 ## License
 

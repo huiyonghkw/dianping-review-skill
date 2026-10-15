@@ -2,9 +2,9 @@
 name: dianping-review-skill
 slug: dianping-review-skill
 displayName: 大众点评评价助手
-summary: 大众点评评价 / 探店笔记写作助手：照片 + 口述 → 不编造的评价和笔记，事实卡对账、品类必写项、内容检查、手动发布包。免费版，纯 Python 标准库。
+summary: 大众点评评价 / 探店笔记写作助手：照片 + 口述 → 不编造的评价和笔记，事实卡对账、品类必写项、内容检查（含 hekouwang-writer-skill 写作规范）、手动发布包。免费版，Python 3 标准库。
 homepage: https://huiyonghkw.github.io/dianping-review-skill/
-version: 1.1.1
+version: 1.2.0
 license: MIT-0
 description: >
   大众点评个人用户的评价与探店笔记写作助手（免费版，消费者视角，不做商家运营）。把用户刚拍的店铺照片和口述，
@@ -17,6 +17,7 @@ description: >
   写法上用行动信息（点什么、几点去、怎么去、适合和不适合谁）引导读者去消费，不喊口号；
   内置去 AI 味规范，套话、升华句、推销腔、商家口吻由内容检查拦下。
   流程：一次问清缺的事实并整理成事实卡 → 按品类必写项写作 → 内容检查 → 改写自查 → 用户要发时整理手动发布包。
+  运行时依赖 hekouwang-writer-skill >= 1.1.0：内容检查调用它的锯末词、长句、敏感信息、算术对账规则，没装就拦下。
   写作和检查只需要 Python 3 标准库。合成首图需要 Pillow（python3 -m pip install pillow）。
   红线：只写用户说过的和照片里看得到的，不编数字和感受，不改用户的评分；不代写虚假好评、
   不刷评、不冒充顾客；不用广告法极限词，不留手机号、微信、二维码等站外联系方式；
@@ -126,6 +127,8 @@ python3 scripts/content_gate.py --kind review --body "…" --facts facts.json --
 # 笔记：--kind note --title "…"；人均栏另填的数用 --per-capita 55（默认取 facts.per_capita）
 ```
 
+内容检查同时按 [hekouwang-writer-skill](https://github.com/huiyonghkw/hekouwang-writer-skill) 的写作规范查一遍（「写作规范·」开头的检查项）：锯末词超密度、≥60 字且无放行理由的长句、完整身份证号或手机号、算术对不上，都会拦；长句告警、分句堆叠、分号只提醒。没装写作 skill 时「写作规范依赖」直接拦，先按提示安装（`clawhub install hekouwang-writer-skill`，或装到本 skill 同级目录）。
+
 `✗ [block]` 必须改到通过；`! [warn]` 告诉用户即可。最常见的 block 是「数字有出处」：正文里出现了事实卡里没有的数字；其次是「人均一致」：正文写的人均和人均栏对不上。「AI腔套话」「硬推销」「商家口吻」也会拦。「行动信息」「写了不适合谁」「破折号」「排比三连」「长短句交错」只提醒。
 事实卡写了 `category`（如「餐饮」「亲子体验」）时，会按 [references/category_rules.json](references/category_rules.json) 提醒该品类读者最关心、但正文没写到的信息。
 
@@ -137,8 +140,10 @@ python3 scripts/content_gate.py --kind review --body "…" --facts facts.json --
 
 正文、标签、首图文字分别放在独立代码块里方便复制（笔记另给标题）。首图文字先写标题，再逐行列出。正文末尾标字数，再用一句话说明第一人称几处、自查改掉了哪几类。最后附图片顺序：封面用哪几张、原图怎么排。
 
-## 协作
+## 依赖与协作
+
+运行时依赖 [hekouwang-writer-skill](https://github.com/huiyonghkw/hekouwang-writer-skill) >= 1.1.0（ClawHub / SkillHub 同名）。内容检查通过 `scripts/writer_bridge.py` 调用它的检查脚本，点评正文因此同时满足它的写作规范。查找顺序：`--writer-dir` → 环境变量 `HEKOUWANG_WRITER_SKILL_DIR` → 本 skill 同级目录 → `~/.claude/skills`、`~/.codex/skills`、`~/.agents/skills`、`~/.cursor/skills`。
 
 点评以外的中文文档交给 [hekouwang-writer-skill](https://github.com/huiyonghkw/hekouwang-writer-skill)（ClawHub / SkillHub 同名），比如办事指南、方案、报告、邮件，或用户想把探店经历整理成一份长篇攻略文档。本 skill 只管点评的评价和笔记。
 
-两边的底线一致：只写有出处的事实，不编数字，不改用户的评价强度。点评正文的门禁以 `content_gate.py` 为准。
+两边的底线一致：只写有出处的事实，不编数字，不改用户的评价强度。

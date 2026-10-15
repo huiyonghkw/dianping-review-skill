@@ -5,7 +5,7 @@ content_gate.py — 发布前内容门禁（智能体铁律的代码化）
 
 用法:
   content_gate.py --title "标题" --body "正文" [--kind note|review] [--facts facts.json]
-                  [--per-capita 55] [--shop 店名] [--json]
+                  [--per-capita 55] [--shop 店名] [--writer-dir DIR] [--json]
 
 两级检查：
   block（任一不过 → 退出码 1，拒绝发布）
@@ -19,12 +19,15 @@ content_gate.py — 发布前内容门禁（智能体铁律的代码化）
     8. 硬推销词（赶紧冲、错过后悔…）：引导消费靠信息，不靠喊
     9. 商家口吻（限时优惠、本店、为您打造…）：消费者不替商家传话
    10. AI 腔套话（值得一提的是、总的来说、不仅…更是…）
+   11. 写作规范（运行时依赖 hekouwang-writer-skill >= 1.1.0，见 writer_bridge.py）：
+       锯末词超密度、必拆长句、身份证号/手机号、结构硬错误、算术对账；依赖缺失也拦
   warn（提示修改，不拦截）
     信息密度（数字 ≥ 2）、感叹号 ≤ 1、emoji ≤ 3、推荐字数区间、推荐标题长度、
     结尾提问、开头卖点与同店已发内容重复（--shop 时读发布回执）、
     品类必写信息（按 facts.category 查 references/category_rules.json）、
     行动信息（怎么买 / 什么时候去 / 怎么去）、写了不适合谁、
-    破折号 ≤ 1、排比三连、句长过于整齐
+    破折号 ≤ 1、排比三连、句长过于整齐、
+    写作规范的长句告警、分句堆叠、分号密度、未超密度的锯末词
 
 事实卡 facts：访谈 + 照片识别得到的结构化事实（任意 JSON），例如
   {"shop": "莫摧咖啡（三圣乡店）", "per_capita": 38, "items": ["脏脏拿铁 32 元"],
@@ -41,6 +44,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from textmatch import fuzzy_in, normalize, split_shop  # noqa: E402
+from writer_bridge import writer_checks  # noqa: E402
 
 RECEIPTS = Path.home() / ".dianping-companion" / "receipts"
 CATEGORY_RULES = Path(__file__).parent.parent / "references" / "category_rules.json"
@@ -308,7 +312,7 @@ def per_capita_mismatches(text: str, per_capita) -> list:
 
 
 def check(title: str, body: str, kind: str, facts=None, per_capita=None, siblings=None,
-          category: str = None) -> dict:
+          category: str = None, writer_dir: str = None) -> dict:
     title = title or ""
     body = body or ""
     rules = KIND_RULES.get(kind, KIND_RULES["note"])
@@ -413,6 +417,8 @@ def check(title: str, body: str, kind: str, facts=None, per_capita=None, sibling
         slo, shi = rules["title_soft"]
         add(f"推荐标题 {slo}–{shi} 字", slo <= len(title) <= shi, f"实际 {len(title)} 字", level="warn")
 
+    results.extend(writer_checks(text, writer_dir))
+
     return {
         "kind": kind,
         "pass": all(r["pass"] for r in results if r["level"] == "block"),
@@ -444,12 +450,14 @@ def main():
     ap.add_argument("--per-capita", type=float, help="人均栏要填的金额（默认取 facts.per_capita）")
     ap.add_argument("--shop", help="店名：读发布回执，检查开头卖点是否与同店已发内容重复")
     ap.add_argument("--category", help="品类（默认按 facts.category 匹配 references/category_rules.json）")
+    ap.add_argument("--writer-dir", help="hekouwang-writer-skill 目录（默认自动查找，见 writer_bridge.py）")
     ap.add_argument("--json", action="store_true", help="输出 JSON")
     args = ap.parse_args()
 
     siblings = load_sibling_hooks(args.shop) if args.shop else None
     report = check(args.title, args.body, args.kind, load_facts(args.facts),
-                   per_capita=args.per_capita, siblings=siblings, category=args.category)
+                   per_capita=args.per_capita, siblings=siblings, category=args.category,
+                   writer_dir=args.writer_dir)
     if args.json:
         print(json.dumps(report, ensure_ascii=False, indent=2))
     else:

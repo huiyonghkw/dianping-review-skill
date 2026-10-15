@@ -59,7 +59,7 @@
 - 用口头的量词和时间：「两大块」「坐到快 5 点」。
 - 一段只讲一件事，不追求每段一样长。
 
-装了 hekouwang-writer-skill 时，长笔记可以再跑它的 `sawdust_scan.py`（锯末词）和 `sentence_load.py`（长句、分句堆叠）做一次体检。结果只作提醒，点评的拦截规则仍以 `content_gate.py` 为准。
+`content_gate.py` 会调用 [hekouwang-writer-skill](https://github.com/huiyonghkw/hekouwang-writer-skill) 的锯末词、长句、分句堆叠、分号检查。点评特有的拦截（套话、推销腔、商家口吻）仍在本文和 `content_gate.py` 里，两套都要过。
 
 ## 三、改写自查（交付前）
 

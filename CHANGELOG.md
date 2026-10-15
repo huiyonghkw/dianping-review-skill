@@ -1,5 +1,11 @@
 # Changelog · dianping-review-skill
 
+## 1.2.0 · 2026-10-15
+
+- **运行时依赖 [hekouwang-writer-skill](https://github.com/huiyonghkw/hekouwang-writer-skill) >= 1.1.0**：内容检查新增 `scripts/writer_bridge.py`，调用它的锯末词、长句、敏感信息、结构、算术对账检查，折算成「写作规范·」检查项。锯末词超密度、必拆长句、完整身份证号或手机号、结构硬错误、算术对不上会拦；长句告警、分句堆叠、分号只提醒。
+- 找不到写作 skill 或版本低于 1.1.0 时，「写作规范依赖」直接拦，并给出安装命令。查找顺序：`--writer-dir` → `HEKOUWANG_WRITER_SKILL_DIR` → 同级目录 → 常见 skills 目录。
+- 新增 `tests/test_writer_bridge.py`（9 项）。安装说明、主页同步加上写作 skill。
+
 ## 1.1.1 · 2026-10-15
 
 - 引入协作 skill [hekouwang-writer-skill](https://github.com/huiyonghkw/hekouwang-writer-skill)：点评以外的中文文档（办事指南、方案、报告、邮件、长篇攻略）交给它。SKILL.md 新增「协作」一节，description 的「不用于」写明交接对象。
